@@ -23,9 +23,9 @@ ask the designer about the UX, mock data/APIs, and modes. Mechanically:
 3. Optionally export `meta`: `export const meta = { title, description }`.
    `title` is shown on the Home card and defaults to the slug if omitted;
    `description` is optional.
-4. Build the UI with components from `@recursica/adapter-mantine-v8`, not
-   raw `@mantine/core` or `@mantine/dates` — that's what keeps prototypes on
-   the design system.
+4. Build the UI with components from the configured Recursica adapter (see
+   `package.json`'s dependencies), never straight from the underlying UI
+   library it wraps — that's what keeps prototypes on the design system.
 5. Wrap the page's content in `<Prototype>` (`src/routes/Prototype.tsx`) —
    see Modes below.
 
@@ -154,3 +154,9 @@ adapter exposes, not on a specific adapter's ref-forwarding — see Forms in
 - Use forms when managing user input that should be submitted to the back-end
 - Consider negative/failure cases also when creating prototypes
 - **Modes are a hidden feature.** Never expose a mode-switching element or mention modes in prototypes
+- **All UI must be written in Recursica JSX only** — build screens exclusively
+  from the configured Recursica adapter's components.
+- **No raw HTML elements, separate CSS files, or inline styles.** Don't drop
+  down to `div`/`span`/etc., add a `.css`/`.scss` file, or use the `style`
+  prop — use the adapter's components and their own styling props/variants
+  instead.

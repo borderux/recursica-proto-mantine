@@ -14,13 +14,13 @@
 
 ## Design system integration
 
-- **`@mantine/core`, `@mantine/dates`, `@mantine/hooks`** — the underlying component/UI framework (peer to the adapter below).
-- **`@recursica/adapter-mantine-v8`** — Recursica's component layer over Mantine. `main.tsx` wraps the app in `MantineProvider` then `RecursicaThemeProvider` (`theme="light"`), and pages import components from the adapter (e.g. `Container` in `src/routes/Home.tsx`) rather than straight from Mantine.
+- **The adapter's underlying UI library** — the component/UI framework the configured Recursica adapter is built on (peer dependency; see `package.json` for the current one).
+- **The Recursica adapter** (see `package.json` dependencies for the exact package) — Recursica's component layer over that underlying library. `main.tsx` wraps the app in the underlying library's provider, then `RecursicaThemeProvider` (`theme="light"`), and pages import components from the adapter (e.g. `Container` in `src/routes/Home.tsx`) rather than straight from the underlying library.
 - **`recursica.json`** — project manifest read by Recursica's own tooling (schema-versioned; declares this project by name/path).
 - **`recursica_brand.json`, `recursica_tokens.json`, `recursica_ui-kit.json`, `recursica_variables_scoped.css`** — exported Recursica design tokens. The `.css` file is imported directly in `main.tsx`; the `.json` files back the postcss step below and are excluded from Prettier (`.prettierignore`) since they're generated, not hand-authored.
 - **`@recursica/recursica-postcss-vars`** (`postcss.config.js`) — rewrites/scopes the design-token CSS variables at build time, reading `recursica_variables_scoped.css`. Runs in `strict` mode only when `NODE_ENV=production`, so a missing/renamed token warns locally but fails a production build.
 - **`src/recursica_fonts.css`** — generated (git-ignored) by a Vite plugin in `vite.config.ts`, imported by `main.tsx`. Resolves `brand.fonts.primary`/`secondary` in `recursica_brand.json` to their typeface's Google Fonts URL in `recursica_tokens.json` and writes `@import url(...)` lines for just those. Runs on every `dev`/`build` (and re-runs on save if either source file changes while `dev` is running), so the font imports always match the current brand — and `recursica_tokens.json` itself, which is large, is only ever read on the Node side, never imported into app code or the client bundle. Every step (files exist, the typeface is actually listed, its URL is well-formed and is a `fonts.googleapis.com` URL) is validated with no fallback — a bad or missing source throws and aborts the build/dev-server rather than rendering with a silently wrong font.
-- **`postcss-preset-mantine`** — Mantine's own postcss helpers (e.g. `rem()`/`em()` conversion), run alongside the plugin above.
+- **The underlying UI library's own PostCSS preset** — its postcss helpers (e.g. `rem()`/`em()` conversion), run alongside the plugin above.
 - **`@recursica/eslint-plugin`** — lints for design-system misuse. Currently just `recursica/no-over-styled` (`error`), which flags the adapter's `overStyled` escape hatch so it doesn't quietly become permanent (see the plugin's own guidance to use a supported variant/prop instead, or track removal). Wired into `eslint.config.mjs` by hand rather than via the plugin's `configs.recommended`, because that export is in old eslintrc shape (`plugins: ["recursica"]`) and flat config rejects it.
 
 ## Forms
@@ -44,7 +44,7 @@
 />
 ```
 
-Why `Controller` and not `register()`: `register()` returns a native `{ name, onChange, onBlur, ref }` bundle meant to be spread onto an uncontrolled `<input>`, which depends on the component forwarding `ref` straight through to the DOM node the way it currently does. `Controller`'s `render` prop only needs a component that accepts `value`/`onChange` (plus `label`/`error` for messages) — the controlled-input contract every Recursica adapter exposes, regardless of which UI library backs it. That's what keeps a form working if the adapter is ever swapped (e.g. Mantine → MUI), per the "everything must stay UI-library-agnostic" ask that drove this choice.
+Why `Controller` and not `register()`: `register()` returns a native `{ name, onChange, onBlur, ref }` bundle meant to be spread onto an uncontrolled `<input>`, which depends on the component forwarding `ref` straight through to the DOM node the way it currently does. `Controller`'s `render` prop only needs a component that accepts `value`/`onChange` (plus `label`/`error` for messages) — the controlled-input contract every Recursica adapter exposes, regardless of which UI library backs it. That's what keeps a form working if the adapter is ever swapped for a different one, per the "everything must stay UI-library-agnostic" ask that drove this choice.
 
 See `src/routes/prototypes/demo/` for a full working example (text/number inputs, dropdowns, a text area, and a submit handler wired to a mock API).
 
@@ -72,15 +72,11 @@ See `src/routes/prototypes/demo/` for a full working example (text/number inputs
 - **`deploy.yml`** — on push to `main`: builds the app with `--base=/<repo>/` (repo name read from the GitHub context, not hardcoded, since this is a template) and publishes `dist/` to the `gh-pages` branch via `JamesIves/github-pages-deploy-action`. Copies `index.html` to `404.html` in the build output so GitHub Pages serves the app (not a real 404) for react-router deep links.
   - **First-time setup** (not done by the workflow): GitHub Pages must be enabled once in repo Settings → Pages, source "Deploy from a branch" → `gh-pages`, after the first `deploy.yml` run creates that branch.
 
-## Editor tooling
-
-- **`.vscode/mcp_config.json`** — configures the Mantine MCP server (`@mantine/mcp-server`) for editors/agents that support MCP, so component docs/APIs are queryable while prototyping.
-
 ## App structure
 
 ```
 src/
-  main.tsx        # Entry point: enableMocking() → MantineProvider → RecursicaThemeProvider → BrowserRouter → App
+  main.tsx        # Entry point: enableMocking() → adapter provider → RecursicaThemeProvider → BrowserRouter → App
   App.tsx          # react-router <Routes>, one <Route> per page/prototype
   routes/          # One file per route (e.g. Home.tsx)
     modes.ts       # `Mode` type + `useModes`/`usePrototypeModes` — the

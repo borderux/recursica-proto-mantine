@@ -14,6 +14,11 @@ You can view the current application at [https://borderux.github.io/recursica-pr
 You can publish new themes by creating pull requests directly from [https://forge.recursica.com](https://forge.recursica.com).
 Your pull request will have a preview build you can review your styles changes.
 
+## Switching the Recursica adapter
+
+To swap the underlying UI library, just update the connected adapter in
+`package.json` — everything else should keep working.
+
 ## Getting started
 
 ```bash
