@@ -160,3 +160,6 @@ adapter exposes, not on a specific adapter's ref-forwarding — see Forms in
   down to `div`/`span`/etc., add a `.css`/`.scss` file, or use the `style`
   prop — use the adapter's components and their own styling props/variants
   instead.
+- You can only use Recursica components to do prototypes
+- Do not use the over styling or overStyled to modify styling of components
+- Do not use html primitives like divs. Use Recursica components.
