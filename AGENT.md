@@ -119,13 +119,14 @@ for the full process. If so:
   server or client storage involved.
 - If a transition genuinely has too much data to encode in the URL, that's
   the signal a prototype needs global state. For now, global state means a
-  **React context + provider that the prototype owns and wraps itself in**
+  **context/provider-style store (e.g. a React context) that the prototype
+  owns and wraps itself in**
   — since a prototype can't know about any other prototype (see below),
   it must not reach for a shared/app-level provider.
 
 ## Forms
 
-Use **[React Hook Form](https://react-hook-form.com/)**, wiring each field
+In React prototypes, use **[React Hook Form](https://react-hook-form.com/)**, wiring each field
 through its `Controller` component (not `register()`) so the form only
 depends on the `value`/`onChange`/`label`/`error` contract every Recursica
 adapter exposes, not on a specific adapter's ref-forwarding — see Forms in
@@ -134,6 +135,17 @@ adapter exposes, not on a specific adapter's ref-forwarding — see Forms in
 
 ## Rules
 
+- **This is a playground, not Recursica code.** The project mimics an
+  application so designers can prototype; it is not part of Recursica
+  itself, so everyone is free to modify any of its code.
+- **Adapter issues get filed, not worked around.** If you find a problem in
+  the Recursica adapter in use, file a GitHub issue against the adapter
+  rather than working around or patching it.
+- **UI comes only from the configured Recursica adapter's components.** No
+  raw HTML elements (`div`, `span`, etc.), separate CSS/SCSS files, or
+  inline `style` props, and no over-styling overrides (`overStyled` or
+  similar) — use the adapter's components and their own styling
+  props/variants.
 - Never hand-edit generated files: `recursica_*.json`,
   `recursica_variables_scoped.css`. They come from Recursica's own export
   tooling.
@@ -147,19 +159,12 @@ adapter exposes, not on a specific adapter's ref-forwarding — see Forms in
   `src/api/`) described above.
 - Don't edit `src/App.tsx` or `src/routes/Home.tsx` just to add a
   prototype; the folder convention handles routing and listing for you.
+- Use forms for any user input that is submitted to the back-end.
+- Prototype the failure cases too: empty, error, and malformed-data states,
+  not just the happy path.
+- **Modes are a hidden feature** (see Modes above) — never expose a
+  mode-switching element or mention modes in a prototype's UI.
 - Before considering work done, run `npm run check-types` and
   `npm run lint`.
 - Don't commit. Leave changes staged/unstaged for the human to review and
   commit themselves.
-- Use forms when managing user input that should be submitted to the back-end
-- Consider negative/failure cases also when creating prototypes
-- **Modes are a hidden feature.** Never expose a mode-switching element or mention modes in prototypes
-- **All UI must be written in Recursica JSX only** — build screens exclusively
-  from the configured Recursica adapter's components.
-- **No raw HTML elements, separate CSS files, or inline styles.** Don't drop
-  down to `div`/`span`/etc., add a `.css`/`.scss` file, or use the `style`
-  prop — use the adapter's components and their own styling props/variants
-  instead.
-- You can only use Recursica components to do prototypes
-- Do not use the over styling or overStyled to modify styling of components
-- Do not use html primitives like divs. Use Recursica components.
