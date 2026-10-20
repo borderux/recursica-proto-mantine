@@ -48,11 +48,15 @@ function typefaceKey(ref: unknown, field: string): string {
   return match[1];
 }
 
-/** Looks up a typeface's Google Fonts URL, validating it as it goes. */
+/**
+ * Looks up a typeface's Google Fonts URL, validating it as it goes. Returns
+ * null (after warning) when the typeface has no Google Fonts extension — the
+ * integrator has to load those fonts themselves.
+ */
 function resolveGoogleFontsUrl(
   typefaces: Record<string, unknown>,
   key: string,
-): string {
+): string | null {
   if (!Object.hasOwn(typefaces, key)) {
     fail(`"${key}" is not listed in ${TOKENS_PATH} (tokens.font.typefaces).`);
   }
@@ -62,9 +66,10 @@ function resolveGoogleFontsUrl(
   ] as Record<string, unknown> | undefined;
   const href = url?.url;
   if (typeof href !== "string" || href.length === 0) {
-    fail(
-      `Typeface "${key}" in ${TOKENS_PATH} has no $extensions."com.google.fonts".url.`,
+    console.warn(
+      `[recursica-fonts] No Google font extension. Unable to assist in loading fonts. Developer must integrate fonts manually for ${key}`,
     );
+    return null;
   }
 
   let parsed: URL;
@@ -129,7 +134,8 @@ function generateFontImports(): void {
 
   const urls = new Set<string>();
   for (const key of usedKeys) {
-    urls.add(resolveGoogleFontsUrl(typefaces, key));
+    const url = resolveGoogleFontsUrl(typefaces, key);
+    if (url) urls.add(url);
   }
 
   const css =
