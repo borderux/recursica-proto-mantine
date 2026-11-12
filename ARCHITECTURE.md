@@ -9,7 +9,7 @@
 - **[Vite](https://vite.dev/)** (`vite.config.ts`) — dev server and build, via `@vitejs/plugin-react`.
 - **React 19** + **[react-router](https://reactrouter.com/) 8** — `src/main.tsx` mounts the app inside a `BrowserRouter`; `src/App.tsx` declares routes, one per file under `src/routes/`.
 - **TypeScript** — split via project references: `tsconfig.json` (root, no files of its own) references `tsconfig.app.json` (`src/`) and `tsconfig.node.json` (`vite.config.ts`). `npm run check-types` runs `tsc -b` across both.
-- **[Mock Service Worker](https://mswjs.io/)** — mocks the API layer shared across prototypes. `public/mockServiceWorker.js` is the generated service worker (`msw init`, excluded from Prettier); `src/main.tsx`'s `enableMocking()` starts it dev-only, before the app renders. See `src/api/` under App structure below.
+- **[Mock Service Worker](https://mswjs.io/)** — mocks the API layer shared across prototypes, since there is no real backend. `public/mockServiceWorker.js` is the generated service worker (`msw init`, excluded from Prettier); `src/main.tsx`'s `enableMocking()` starts it before the app renders, in dev and production builds alike. See `src/api/` under App structure below.
 - **[React Hook Form](https://react-hook-form.com/)** — form state/validation, wired to design-system inputs via `Controller` rather than `register()`. See Forms below.
 
 ## Design system integration
@@ -79,15 +79,15 @@ src/
   main.tsx        # Entry point: enableMocking() → adapter provider → RecursicaThemeProvider → BrowserRouter → App
   App.tsx          # react-router <Routes>, one <Route> per page/prototype
   routes/          # One file per route (e.g. Home.tsx)
-    modes.ts       # `Mode` type + `useModes`/`usePrototypeModes` — the
-                   #   `?mode=<id>` convention
-    ModesPanel.tsx # Slide-out (right) picker UI for a prototype's modes
+    stories.ts     # `Story` type + `useStories`/`usePrototypeStories` — the
+                   #   `?story=<id>` convention
+    StoriesPanel.tsx # Slide-out (right) picker UI for a prototype's stories
     Prototype.tsx  # <Prototype> wrapper every prototype renders through —
-                   #   always mounts ModesPanel, even with no modes
+                   #   always mounts StoriesPanel, even with no stories
     prototypes/    # index.ts auto-discovers every <slug>/index.tsx below it
       <slug>/      #   and registers it at /prototypes/<slug> — no manual
         index.tsx  #   route or Home wiring needed to add one
-        modes.ts   #   optional: this prototype's `modes: Mode[]`
+        stories.ts #   optional: this prototype's `stories: Story[]`
   data/            # Mock datasets shared across prototypes
     index.ts       # Registry: auto-discovers every <name>/index.ts below
     <name>/        #   a typed, JSDoc'd data array; import it directly
@@ -114,7 +114,7 @@ prototype may use (see Prototype conventions below).
 - **Isolation.** No code sharing between prototypes — no shared code or
   folders outside a prototype's own folder, other than the app chrome under
   `src/routes/`, the registry (`src/routes/prototypes/index.ts`), the
-  modes convention (`src/routes/modes.ts`, `src/routes/ModesPanel.tsx`,
+  stories convention (`src/routes/stories.ts`, `src/routes/StoriesPanel.tsx`,
   `src/routes/Prototype.tsx`), and the shared mock data/API folders below.
   A prototype must not import from or modify another prototype's folder.
 - **Mock data & mock APIs are the two deliberate exceptions.** Real
@@ -130,17 +130,17 @@ prototype may use (see Prototype conventions below).
   error/malformed handlers alongside its default one. See
   `src/data/greetings/` + `src/api/greetings/` for a working example.
 - **Every prototype renders through `<Prototype>`** (`src/routes/Prototype.tsx`),
-  which always mounts the mode-picker panel — so `?mode`/`?modes` opens it
-  even for a prototype with no modes defined, not just ones that opted in.
-- **Modes select which mock data/API behavior a prototype uses**, by
-  number, via `?mode=<id>` — the generalized, reusable version of swapping
+  which always mounts the story-picker panel — so `?story`/`?stories` opens it
+  even for a prototype with no stories defined, not just ones that opted in.
+- **Stories select which mock data/API behavior a prototype uses**, by
+  number, via `?story=<id>` — the generalized, reusable version of swapping
   scenarios in with `worker.use(...)` / back out with
   `worker.resetHandlers()` (`src/api/worker.ts`). A prototype that wants
-  modes adds a colocated `modes.ts` (`Mode[]` from `src/routes/modes.ts`),
-  passes it as `<Prototype modes={modes}>`, and reads the active one with
-  `usePrototypeModes()`. `ModesPanel` (`src/routes/ModesPanel.tsx`) is the
+  stories adds a colocated `stories.ts` (`Story[]` from `src/routes/stories.ts`),
+  passes it as `<Prototype stories={stories}>`, and reads the active one with
+  `usePrototypeStories()`. `StoriesPanel` (`src/routes/StoriesPanel.tsx`) is the
   picker itself, sliding out from the right when the URL asks for it
-  (`?mode` with no value, or `?modes`) rather than naming a mode directly.
+  (`?story` with no value, or `?stories`) rather than naming a story directly.
   See `docs/PROTOTYPE.md` for the designer-facing process and
   `src/routes/prototypes/demo/` for a working example.
 - **Everything is routable**, including modals — a modal should be

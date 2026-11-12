@@ -14,7 +14,7 @@ any other prototype.
 ## How to add a prototype
 
 See `docs/PROTOTYPE.md` for the process to follow first — the questions to
-ask the designer about the UX, mock data/APIs, and modes. Mechanically:
+ask the designer about the UX, mock data/APIs, and stories. Mechanically:
 
 1. Create `src/routes/prototypes/<slug>/index.tsx` — `<slug>` becomes both
    the folder name and the URL (`/prototypes/<slug>`), so pick a kebab-case
@@ -27,7 +27,7 @@ ask the designer about the UX, mock data/APIs, and modes. Mechanically:
    `package.json`'s dependencies), never straight from the underlying UI
    library it wraps — that's what keeps prototypes on the design system.
 5. Wrap the page's content in `<Prototype>` (`src/routes/Prototype.tsx`) —
-   see Modes below.
+   see Stories below.
 
 Nothing else needs to change — Home and routing auto-discover the folder.
 
@@ -64,8 +64,8 @@ that something should be reusable rather than reinvented per prototype.
   - **Simulate real network latency** with `mockDelay()`
     (`src/api/delay.ts`) — `await` it at the top of every resolver. It
     defaults to `DEFAULT_DELAY_MS` (1000ms); to make the delay configurable
-    per mode, write the handler as a factory that takes `delayMs` and
-    passes it through, so a mode with a different handler set can also
+    per story, write the handler as a factory that takes `delayMs` and
+    passes it through, so a story with a different handler set can also
     pass a different latency — see `src/api/inventory/`'s `createHandlers`
     for a working example.
 - **Switch scenarios at runtime** with `worker.use(...someHandlers)`
@@ -78,32 +78,32 @@ that something should be reusable rather than reinvented per prototype.
 - See `src/data/greetings/` + `src/api/greetings/` (data + the endpoint
   that serves it, including error/bad-data scenarios) and
   `src/routes/prototypes/demo/` (a prototype consuming its own dataset +
-  API, switched via modes — see below) for a working example.
+  API, switched via stories — see below) for a working example.
 
-## Modes
+## Stories
 
 Every prototype's `index.tsx` wraps its content in the shared
 `<Prototype>` component (`src/routes/Prototype.tsx`) — this is what makes
-the mode-picker panel available via `?mode`/`?modes` even for a prototype
-with no modes defined, so don't skip it just because a prototype doesn't
-need modes yet.
+the story-picker panel available via `?story`/`?stories` even for a prototype
+with no stories defined, so don't skip it just because a prototype doesn't
+need stories yet.
 
 Ask the designer whether they want to see a prototype in more than one
 state (different data, or different API behavior) — see `docs/PROTOTYPE.md`
 for the full process. If so:
 
-- The prototype's own folder gets a colocated `modes.ts` exporting
-  `modes: Mode[]` (`Mode` from `src/routes/modes.ts`), each with a numeric
+- The prototype's own folder gets a colocated `stories.ts` exporting
+  `stories: Story[]` (`Story` from `src/routes/stories.ts`), each with a numeric
   `id`, a `name`, and a `description` (from the designer).
-- Pass it to `<Prototype modes={modes}>` and read the active mode from
-  inside with `usePrototypeModes()` (`src/routes/modes.ts`) — the
-  prototype itself decides what each mode `id` does (which dataset, which
+- Pass it to `<Prototype stories={stories}>` and read the active story from
+  inside with `usePrototypeStories()` (`src/routes/stories.ts`) — the
+  prototype itself decides what each story `id` does (which dataset, which
   handler set).
-- The URL convention: `?mode=1` selects a mode directly; `?mode` (no
-  value) or `?modes` opens the mode-picker panel instead.
-- **Modes are a hidden feature.** Unless the designer explicitly asks for
-  it, a prototype's own UI must never surface the word "mode", a button/link
-  that opens the panel, or the current mode's name — the panel is reached
+- The URL convention: `?story=1` selects a story directly; `?story` (no
+  value) or `?stories` opens the story-picker panel instead.
+- **Stories are a hidden feature.** Unless the designer explicitly asks for
+  it, a prototype's own UI must never surface the word "story", a button/link
+  that opens the panel, or the current story's name — the panel is reached
   only by adding the search param to the URL by hand.
 
 ## Routing & state
@@ -153,8 +153,8 @@ adapter exposes, not on a specific adapter's ref-forwarding — see Forms in
   fully self-contained — never import from, or modify, another prototype's
   folder. There should be no shared code or folders outside of each
   prototype's own folder, other than the app chrome under `src/routes/`,
-  the registry (`src/routes/prototypes/index.ts`), the modes convention
-  (`src/routes/modes.ts`, `src/routes/ModesPanel.tsx`,
+  the registry (`src/routes/prototypes/index.ts`), the stories convention
+  (`src/routes/stories.ts`, `src/routes/StoriesPanel.tsx`,
   `src/routes/Prototype.tsx`), and the mock data/API folders (`src/data/`,
   `src/api/`) described above.
 - Don't edit `src/App.tsx` or `src/routes/Home.tsx` just to add a
@@ -162,8 +162,13 @@ adapter exposes, not on a specific adapter's ref-forwarding — see Forms in
 - Use forms for any user input that is submitted to the back-end.
 - Prototype the failure cases too: empty, error, and malformed-data states,
   not just the happy path.
+  <<<<<<< Updated upstream
 - **Modes are a hidden feature** (see Modes above) — never expose a
   mode-switching element or mention modes in a prototype's UI.
+  =======
+- **Stories are a hidden feature** (see Stories above) — never expose a
+  story-switching element or mention stories in a prototype's UI.
+  > > > > > > > Stashed changes
 - Before considering work done, run `npm run check-types` and
   `npm run lint`.
 - Don't commit. Leave changes staged/unstaged for the human to review and

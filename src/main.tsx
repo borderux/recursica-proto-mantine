@@ -9,12 +9,14 @@ import { RecursicaThemeProvider } from "@recursica/adapter-mantine-v8";
 import { BrowserRouter } from "react-router";
 import App from "./App.tsx";
 
-// Mock API (see src/api/) is dev-only — prototypes talk to /api/* as if a
-// real backend existed, MSW intercepts the requests in the browser.
+// There is no real backend for these static prototypes — /api/* requests
+// are always intercepted by MSW, in dev and in production builds alike.
 async function enableMocking() {
-  if (!import.meta.env.DEV) return;
   const { worker } = await import("./api/worker");
-  return worker.start({ onUnhandledRequest: "bypass" });
+  return worker.start({
+    onUnhandledRequest: "bypass",
+    serviceWorker: { url: `${import.meta.env.BASE_URL}mockServiceWorker.js` },
+  });
 }
 
 enableMocking().then(() => {

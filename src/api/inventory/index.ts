@@ -60,7 +60,7 @@ function updateInventoryItemError(delayMs: number) {
 /**
  * Builds this API's three scenarios with a shared artificial latency —
  * defaults to `DEFAULT_DELAY_MS` (1000ms). Pass a different value to make
- * the delay configurable per mode (e.g. a "Slow network" mode) without
+ * the delay configurable per story (e.g. a "Slow network" story) without
  * touching the resolvers themselves.
  */
 export function createHandlers(delayMs: number = DEFAULT_DELAY_MS) {
