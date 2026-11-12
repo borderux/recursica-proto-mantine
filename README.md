@@ -29,7 +29,7 @@ npm run dev
 ## Adding a prototype
 
 See [docs/PROTOTYPE.md](./docs/PROTOTYPE.md) for the process — what to ask the designer about
-data, APIs, and modes before building. Mechanically:
+data, APIs, and stories before building. Mechanically:
 
 1. Create a folder: `src/routes/prototypes/<slug>/index.tsx`. `<slug>`
    becomes the URL — `demo` → `/prototypes/demo`.

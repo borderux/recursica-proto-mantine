@@ -30,80 +30,80 @@ Essential questions for every prototype — don't skip these:
 - **Mention related existing prototypes**, if any — worth a look before
   building something similar from scratch.
 
-## 4. Ask about modes
+## 4. Ask about stories
 
 Ask whether the designer wants to see this prototype in more than one
 state — different data, or different API behavior (success, empty, error,
-slow). If so, each state becomes a **mode** — see below.
+slow). If so, each state becomes a **story** — see below.
 
 ## 5. Build it
 
 Create `src/routes/prototypes/<name>/index.tsx` per AGENT.md's mechanical
-steps, using the data/API entries from step 3 and the modes from step 4.
+steps, using the data/API entries from step 3 and the stories from step 4.
 
-## Modes
+## Stories
 
-A **mode** is a named, numbered variant of a prototype: it selects which
+A **story** is a named, numbered variant of a prototype: it selects which
 mock data and/or which mock API behavior the prototype uses while
 rendering — the success case, an empty result, an API error, a different
-dataset entirely. Modes let a designer flip between "what does this look
+dataset entirely. Stories let a designer flip between "what does this look
 like with data", "what does this look like empty", "what does this look
 like when the API fails", without a separate prototype for each.
 
 ### Structure
 
-A prototype that has modes adds one file to its own folder:
+A prototype that has stories adds one file to its own folder:
 
 ```
 src/routes/prototypes/<name>/
   index.tsx   # page component
-  modes.ts    # this prototype's mode definitions
+  stories.ts  # this prototype's story definitions
 ```
 
-`modes.ts` exports a `modes: Mode[]` array (`Mode` from
-`src/routes/modes.ts`), each entry with:
+`stories.ts` exports a `stories: Story[]` array (`Story` from
+`src/routes/stories.ts`), each entry with:
 
-- `id` — a number; this is what `?mode=<id>` switches on.
-- `name` — short label shown in the mode picker.
-- `description` — from the designer, in plain language: what this mode
+- `id` — a number; this is what `?story=<id>` switches on.
+- `name` — short label shown in the story picker.
+- `description` — from the designer, in plain language: what this story
   does differently (which data, which API behavior).
 
 ```ts
-import type { Mode } from "../../modes";
+import type { Story } from "../../stories";
 
-export const modes: Mode[] = [
+export const stories: Story[] = [
   { id: 1, name: "Default", description: "Loads normally with sample data." },
   { id: 2, name: "Empty", description: "No records — shows the empty state." },
   { id: 3, name: "API error", description: "The API call fails with a 500." },
 ];
 ```
 
-The prototype's `index.tsx` passes these to `<Prototype modes={modes}>`
+The prototype's `index.tsx` passes these to `<Prototype stories={stories}>`
 (`src/routes/Prototype.tsx`), which every prototype's page wraps its
 content in, and reads the active one from inside with
-`usePrototypeModes()` (`src/routes/modes.ts`). The prototype itself
-decides what each mode number actually does — which dataset, which
+`usePrototypeStories()` (`src/routes/stories.ts`). The prototype itself
+decides what each story number actually does — which dataset, which
 handler set — the same way it already owns everything else about its own
 page.
 
-A prototype with no modes still wraps its content in `<Prototype>` (just
-without a `modes` prop) — that's what makes the picker panel open via
-`?mode`/`?modes` for every prototype, not only ones that define modes.
+A prototype with no stories still wraps its content in `<Prototype>` (just
+without a `stories` prop) — that's what makes the picker panel open via
+`?story`/`?stories` for every prototype, not only ones that define stories.
 
 ### URL convention
 
-- `?mode=1` — selects mode `1` directly. Always numeric, so a specific
-  mode is a plain, shareable link.
-- `?mode` (no value) or `?modes` (any value, or none) — opens the mode
-  picker panel instead of selecting a mode.
-- No `mode` param, or one that doesn't match a known id — falls back to
-  the first mode in the array.
+- `?story=1` — selects story `1` directly. Always numeric, so a specific
+  story is a plain, shareable link.
+- `?story` (no value) or `?stories` (any value, or none) — opens the story
+  picker panel instead of selecting a story.
+- No `story` param, or one that doesn't match a known id — falls back to
+  the first story in the array.
 
 ### The picker panel
 
-`ModesPanel` slides out from the right, listing every mode by name and
-description. Clicking one sets `?mode=<id>`, closes the panel, and
-re-renders the prototype in that mode.
+`StoriesPanel` slides out from the right, listing every story by name and
+description. Clicking one sets `?story=<id>`, closes the panel, and
+re-renders the prototype in that story.
 
 See `src/routes/prototypes/demo/` for a complete, working example (three
-modes: default, a failed load, and a failed submit).
+stories: default, a failed load, and a failed submit).

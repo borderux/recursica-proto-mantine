@@ -17,7 +17,7 @@ import {
 } from "@recursica/adapter-mantine-v8";
 import type { PrototypeMeta } from "..";
 import { Prototype } from "../../Prototype";
-import { usePrototypeModes } from "../../modes";
+import { usePrototypeStories } from "../../stories";
 import {
   ASSET_STATUSES,
   ASSET_TYPES,
@@ -32,17 +32,17 @@ import {
   submitErrorHandlers,
 } from "../../../api/inventory";
 import { worker } from "../../../api/worker";
-import { modes } from "./modes";
+import { stories } from "./stories";
 
 export const meta: PrototypeMeta = {
   title: "Demo Prototype",
   description:
-    "Inventory dashboard for an AI infrastructure company's GPUs and servers: a table, a click-to-edit modal, and modes for a failed load or a failed save.",
+    "Inventory dashboard for an AI infrastructure company's GPUs and servers: a table, a click-to-edit modal, and stories for a failed load or a failed save.",
 };
 
-// Maps each mode's id to the handler set it swaps into /api/inventory at
+// Maps each story's id to the handler set it swaps into /api/inventory at
 // runtime (worker.use / worker.resetHandlers) — see src/api/inventory/.
-const HANDLERS_BY_MODE: Record<number, typeof handlers> = {
+const HANDLERS_BY_STORY: Record<number, typeof handlers> = {
   1: handlers,
   2: loadErrorHandlers,
   3: submitErrorHandlers,
@@ -232,7 +232,7 @@ function EditItemModal({
 }
 
 function DemoPrototypeContent() {
-  const { activeMode } = usePrototypeModes();
+  const { activeStory } = usePrototypeStories();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [searchParams, setSearchParams] = useSearchParams();
   const itemId = searchParams.get("item");
@@ -272,17 +272,17 @@ function DemoPrototypeContent() {
       );
   }, []);
 
-  // The active mode's handlers stay swapped in for as long as it's
+  // The active story's handlers stay swapped in for as long as it's
   // selected, since both the initial load (GET) and a later save (PATCH)
   // need to see the same scenario.
   useEffect(() => {
-    if (!activeMode) return;
-    worker.use(...HANDLERS_BY_MODE[activeMode.id]);
+    if (!activeStory) return;
+    worker.use(...HANDLERS_BY_STORY[activeStory.id]);
     load();
     return () => worker.resetHandlers();
-  }, [activeMode, load]);
+  }, [activeStory, load]);
 
-  if (!activeMode) return null;
+  if (!activeStory) return null;
 
   const rows =
     state.status === "ok"
@@ -354,7 +354,7 @@ function DemoPrototypeContent() {
 
 function DemoPrototype() {
   return (
-    <Prototype modes={modes}>
+    <Prototype stories={stories}>
       <DemoPrototypeContent />
     </Prototype>
   );

@@ -1,36 +1,37 @@
 import type { ReactNode } from "react";
-import { ModesContext, useModes, type Mode } from "./modes";
-import { ModesPanel } from "./ModesPanel";
+import { StoriesContext, useStories, type Story } from "./stories";
+import { StoriesPanel } from "./StoriesPanel";
 
 interface PrototypeProps {
-  /** This prototype's modes, from its colocated `modes.ts`. Omit it (or
-   * pass nothing) if the prototype doesn't define any modes — the picker
-   * panel still opens via `?mode`/`?modes`, it just has nothing to list. */
-  modes?: Mode[];
+  /** This prototype's stories, from its colocated `stories.ts`. Omit it (or
+   * pass nothing) if the prototype doesn't define any stories — the picker
+   * panel still opens via `?story`/`?stories`, it just has nothing to
+   * list. */
+  stories?: Story[];
   children: ReactNode;
 }
 
 /**
  * Shared chrome every prototype's `index.tsx` renders through, instead of
- * calling `useModes`/`ModesPanel` itself. Owns the `?mode=<id>` / `?mode` /
- * `?modes` URL convention and always mounts the picker panel — so opening
- * it works for every prototype, even one that hasn't defined any modes
- * yet. Read the mode state from inside `children` with `usePrototypeModes`
- * (`modes.ts`). See `docs/PROTOTYPE.md`.
+ * calling `useStories`/`StoriesPanel` itself. Owns the `?story=<id>` /
+ * `?story` / `?stories` URL convention and always mounts the picker panel
+ * — so opening it works for every prototype, even one that hasn't defined
+ * any stories yet. Read the story state from inside `children` with
+ * `usePrototypeStories` (`stories.ts`). See `docs/PROTOTYPE.md`.
  */
-export function Prototype({ modes = [], children }: PrototypeProps) {
-  const state = useModes(modes);
+export function Prototype({ stories = [], children }: PrototypeProps) {
+  const state = useStories(stories);
 
   return (
-    <ModesContext.Provider value={state}>
+    <StoriesContext.Provider value={state}>
       {children}
-      <ModesPanel
-        modes={modes}
-        activeMode={state.activeMode}
+      <StoriesPanel
+        stories={stories}
+        activeStory={state.activeStory}
         isOpen={state.isPanelOpen}
-        onSelect={state.selectMode}
+        onSelect={state.selectStory}
         onClose={state.closePanel}
       />
-    </ModesContext.Provider>
+    </StoriesContext.Provider>
   );
 }
